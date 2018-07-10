@@ -5,6 +5,7 @@ pip install pyscreenshot
 pip install pyautogui
 pip install pypiwin32
 '''
+from PIL import Image
 import io
 import keyboard
 import mouse
@@ -29,34 +30,40 @@ class ClickEventHandler(object):
     def unset_all_click_event(self):
         mouse.unhook_all()
 
+def specify_range():
+    click = ClickEventHandler()
+    click.set_left_click_event()
+    while len(click.x) < 2:
+        continue
+    click.unset_all_click_event()
+    return click.x[0], click.y[0], click.x[1], click.y[1]
 
-def send_to_clipboard(data, clip_type=win32clipboard.CF_BITMAP): 
+def send_to_clipboard(data, clip_type=win32clipboard.CF_DIB): 
     win32clipboard.OpenClipboard()
     win32clipboard.EmptyClipboard()
     win32clipboard.SetClipboardData(clip_type, data) 
     win32clipboard.CloseClipboard()
+
+def transform_pil_to_bmp(im):
+    output = io.BytesIO()
+    im.convert("RGB").save(output, "BMP")
+    data = output.getvalue()[14:]
+    output.close()
+    return data
 
 def save_screen_to_clipboard():
     '''
     Get a screenshot of the active application and save it to the clipboard.
     Capture range is specifed by mouse position.
     '''
-    click = ClickEventHandler()
-    click.set_left_click_event()
-    while len(click.x) < 2:
-        continue
-    click.unset_all_click_event()
-
-    im = ImageGrab.grab(bbox=(click.x[0], click.y[0], click.x[1], click.y[1]))
+    x0, y0, x1, y1 = specify_range()
+    im = ImageGrab.grab(bbox=(x0, y0, x1, y1))
+    # save to temporary file
     im.save('temp.bmp', 'BMP')
-    '''
-    with io.BytesIO() as output:
-        # Magic number '14' means bitmap header.
-        im.convert("RGB").save(output, "BMP")
-        im = output.getvalue()[14:]
-    '''
-    im = im.convert('RGB').tobytes()
-    send_to_clipboard(im)
+
+    # send image to clipboard
+    data = transform_pil_to_bmp(im)
+    send_to_clipboard(data)
     print('Send the capture to clipboard')
 
 
