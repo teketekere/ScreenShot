@@ -18,21 +18,22 @@ class ClickEventHandler(object):
         self.x = []
         self.y = []
 
-    def on_left_click(self):
+    def on_right_click(self):
         x, y = pag.position()
         self.x.append(x)
         self.y.append(y)
 
-    def set_left_click_event(self):
-        print('Press left-click twice to specity the capture range.')
-        mouse.on_click(self.on_left_click)
+    def set_right_click_event(self):
+        print('Drag mouse by right-click to specity the capture range.')
+        mouse.on_button(self.on_right_click, buttons='right', types='down')
+        mouse.on_button(self.on_right_click, buttons='right', types='up')
 
     def unset_all_click_event(self):
         mouse.unhook_all()
 
 def specify_range():
     click = ClickEventHandler()
-    click.set_left_click_event()
+    click.set_right_click_event()
     while len(click.x) < 2:
         continue
     click.unset_all_click_event()
@@ -54,7 +55,7 @@ def transform_pil_to_bmp(im):
 def save_screen_to_clipboard():
     '''
     Get a screenshot of the active application and save it to the clipboard.
-    Capture range is specifed by mouse position.
+    Capture range is specifed by mouse drag.
     '''
     x0, y0, x1, y1 = specify_range()
     im = ImageGrab.grab(bbox=(x0, y0, x1, y1))
@@ -70,14 +71,11 @@ def save_screen_to_clipboard():
 if __name__ == '__main__':
     '''
     While this script being executed, you can save a screenshot of the active application to the clipboard.
-    To do this, first press 'alt+s'. Then, press left-click twice. Capture range is specifed by mouse position.
+    To do this, first press 'alt+s'. Then drag mouse by right-click to specify the capture range.
     Windows OS only.
 
     Example:
     python screenshot.py
-
-    Todo:
-    Copying image to clipboard
     '''
     print('Press Ctrl-c to quit.')
     print('Press Alt-s to capture.')
@@ -85,5 +83,5 @@ if __name__ == '__main__':
     # Add hotkey. 'save_screen_to_clipboard' is executed after press 'alt+s'.
     keyboard.add_hotkey('alt+s', save_screen_to_clipboard, args=())
 
-    # Block forever, like `while True`.
+    # Block forever
     keyboard.wait()
