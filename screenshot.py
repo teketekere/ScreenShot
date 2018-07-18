@@ -24,7 +24,6 @@ class ClickEventHandler(object):
         self.y.append(y)
 
     def set_right_click_event(self):
-        print('Drag mouse by right-click to specity the capture range.')
         mouse.on_button(self.on_right_click, buttons='right', types='down')
         mouse.on_button(self.on_right_click, buttons='right', types='up')
 
@@ -34,6 +33,7 @@ class ClickEventHandler(object):
 def specify_range():
     click = ClickEventHandler()
     click.set_right_click_event()
+    print('Drag mouse by right-click to specity the capture range')
     while len(click.x) < 2:
         continue
     click.unset_all_click_event()
